@@ -1,0 +1,17 @@
+[package]
+name = "revenexx"
+version = "0.0.1"
+edition = "2021"
+description = "Revenexx Rust SDK."
+license = "MIT"
+repository = "https://github.com/revenexx-sdks/rust"
+homepage = "https://revenexx.com"
+readme = "README.md"
+keywords = ["sdk", "api", "revenexx api — revenexx"]
+categories = ["api-bindings"]
+
+[dependencies]
+reqwest = { version = "0.12", features = ["json", "multipart"] }
+tokio = { version = "1", features = ["full"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"

@@ -1,0 +1,6 @@
+site_name: Revenexx Rust
+site_description: "Revenexx Rust SDK."
+docs_dir: docs
+
+theme:
+  name: material

@@ -1,0 +1,18 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: revenexx-rust
+  title: Revenexx Rust
+  description: "Revenexx Rust SDK for server-side applications."
+  annotations:
+    github.com/project-slug: revenexx-sdks/rust
+    backstage.io/techdocs-ref: url:https://github.com/revenexx-sdks/rust/tree/main/
+  links:
+    - url: https://github.com/revenexx-sdks/rust
+      title: GitHub Repository
+      icon: github
+spec:
+  type: library
+  lifecycle: production
+  owner: group:default/developer-experience
+  system: revenue-cloud

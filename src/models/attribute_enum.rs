@@ -1,0 +1,38 @@
+use serde::{Deserialize, Serialize};
+
+/// AttributeEnum
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+pub struct AttributeEnum {
+    /// Attribute creation date in ISO 8601 format.
+    #[serde(rename = "$createdAt", default)]
+    pub created_at: String,
+    /// Attribute update date in ISO 8601 format.
+    #[serde(rename = "$updatedAt", default)]
+    pub updated_at: String,
+    /// Is attribute an array?
+    #[serde(rename = "array", default)]
+    pub array: bool,
+    /// Array of elements in enumerated type.
+    #[serde(rename = "elements", default)]
+    pub elements: Vec<String>,
+    /// Error message. Displays error generated on failure of creating or deleting
+    /// an attribute.
+    #[serde(rename = "error", default)]
+    pub error: String,
+    /// String format.
+    #[serde(rename = "format", default)]
+    pub format: String,
+    /// Attribute Key.
+    #[serde(rename = "key", default)]
+    pub key: String,
+    /// Is attribute required?
+    #[serde(rename = "required", default)]
+    pub required: bool,
+    /// Attribute status. Possible values: `available`, `processing`, `deleting`,
+    /// `stuck`, or `failed`
+    #[serde(rename = "status", default)]
+    pub status: String,
+    /// Attribute type.
+    #[serde(rename = "type", default)]
+    pub xtype: String,
+}
