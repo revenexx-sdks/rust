@@ -7,9 +7,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let response = client.avatars().avatars_get_qr(
         "".to_string(),
-        Some(0),
-        Some(0),
-        Some(false),
+        Some(1),
+        Some(1),
+        Some(true),
     ).await?;
 
     println!("{:?}", response);

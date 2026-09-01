@@ -15,10 +15,88 @@ impl Prices {
     pub fn new(client: Client) -> Self {
         Prices { client }
     }
-    pub async fn prices_lists_list(&self) -> Result<serde_json::Value, Error> {
+    /// One page of the tenant's price list HEADERS — code, currency, tax basis,
+    /// status, priority, validity window, buyer scope and the default flag. Never
+    /// the prices themselves: those are a separate page per list (`GET
+    /// /prices/lists/{list_id}/entries`).
+    /// 
+    /// Every filter is an EXACT match on a column, ANDed together; a query key
+    /// that is not a column is dropped in silence, which is why the answer echoes
+    /// `filter`. The scope, currency and status filters are the useful ones,
+    /// because between them they narrow the set to the candidates a resolve call
+    /// in a given currency for a given buyer can draw on at all.
+    /// 
+    /// Market is deliberately not among them: a list is scoped to a market by an
+    /// assignment, not a column, and the `X-Revenexx-Market` header is what
+    /// narrows the set — this admin listing shows the tenant's lists whatever
+    /// their market.
+    pub async fn prices_lists_list(&self, id: Option<String>, code: Option<String>, name: Option<String>, description: Option<String>, currency: Option<String>, status: Option<String>, priority: Option<i64>, is_default: Option<bool>, tax_basis: Option<String>, tax_included: Option<bool>, requires_auth: Option<bool>, contact_id: Option<String>, organization_id: Option<String>, channel_id: Option<String>, valid_from: Option<String>, valid_until: Option<String>, created_at: Option<String>, updated_at: Option<String>, limit: Option<i64>, offset: Option<i64>, order: Option<String>) -> Result<crate::models::Error, Error> {
         let api_path = "/v1/prices/lists".to_string();
 
         let mut api_params: HashMap<String, Value> = HashMap::new();
+        if let Some(value) = &id {
+            api_params.insert("id".to_string(), serde_json::to_value(value)?);
+        }
+        if let Some(value) = &code {
+            api_params.insert("code".to_string(), serde_json::to_value(value)?);
+        }
+        if let Some(value) = &name {
+            api_params.insert("name".to_string(), serde_json::to_value(value)?);
+        }
+        if let Some(value) = &description {
+            api_params.insert("description".to_string(), serde_json::to_value(value)?);
+        }
+        if let Some(value) = &currency {
+            api_params.insert("currency".to_string(), serde_json::to_value(value)?);
+        }
+        if let Some(value) = &status {
+            api_params.insert("status".to_string(), serde_json::to_value(value)?);
+        }
+        if let Some(value) = &priority {
+            api_params.insert("priority".to_string(), serde_json::to_value(value)?);
+        }
+        if let Some(value) = &is_default {
+            api_params.insert("is_default".to_string(), serde_json::to_value(value)?);
+        }
+        if let Some(value) = &tax_basis {
+            api_params.insert("tax_basis".to_string(), serde_json::to_value(value)?);
+        }
+        if let Some(value) = &tax_included {
+            api_params.insert("tax_included".to_string(), serde_json::to_value(value)?);
+        }
+        if let Some(value) = &requires_auth {
+            api_params.insert("requires_auth".to_string(), serde_json::to_value(value)?);
+        }
+        if let Some(value) = &contact_id {
+            api_params.insert("contact_id".to_string(), serde_json::to_value(value)?);
+        }
+        if let Some(value) = &organization_id {
+            api_params.insert("organization_id".to_string(), serde_json::to_value(value)?);
+        }
+        if let Some(value) = &channel_id {
+            api_params.insert("channel_id".to_string(), serde_json::to_value(value)?);
+        }
+        if let Some(value) = &valid_from {
+            api_params.insert("valid_from".to_string(), serde_json::to_value(value)?);
+        }
+        if let Some(value) = &valid_until {
+            api_params.insert("valid_until".to_string(), serde_json::to_value(value)?);
+        }
+        if let Some(value) = &created_at {
+            api_params.insert("created_at".to_string(), serde_json::to_value(value)?);
+        }
+        if let Some(value) = &updated_at {
+            api_params.insert("updated_at".to_string(), serde_json::to_value(value)?);
+        }
+        if let Some(value) = &limit {
+            api_params.insert("limit".to_string(), serde_json::to_value(value)?);
+        }
+        if let Some(value) = &offset {
+            api_params.insert("offset".to_string(), serde_json::to_value(value)?);
+        }
+        if let Some(value) = &order {
+            api_params.insert("order".to_string(), serde_json::to_value(value)?);
+        }
 
         let mut api_headers: HashMap<String, String> = HashMap::new();
 
@@ -27,13 +105,35 @@ impl Prices {
             .call("GET", &api_path, api_headers, api_params)
             .await?;
 
-        if api_response.body.is_empty() {
-            Ok(serde_json::Value::Null)
-        } else {
-            Ok(serde_json::from_slice(&api_response.body)?)
-        }
+        Ok(serde_json::from_slice(&api_response.body)?)
     }
-    pub async fn prices_lists_create(&self, code: String, name: String, channel_id: Option<String>, contact_id: Option<String>, currency: Option<String>, description: Option<String>, is_default: Option<bool>, labels: Option<serde_json::Value>, market_id: Option<String>, metadata: Option<serde_json::Value>, organization_id: Option<String>, priority: Option<i64>, status: Option<String>, tax_included: Option<bool>, valid_from: Option<String>, valid_until: Option<String>) -> Result<crate::models::PriceList, Error> {
+    /// Opens an empty book, and states in one row the four things that decide
+    /// whether it will ever price anything: its currency, its priority within a
+    /// specificity group, its validity window, and its buyer scope (contact,
+    /// organization or channel — leave all three empty for a list open to
+    /// everyone).
+    /// 
+    /// `code` and `name` are the only fields required — they are the two columns
+    /// with no default — and `code` is unique per tenant, so a code already in
+    /// use is a 409 rather than an overwrite of prices somebody is selling on.
+    /// 
+    /// Everything else has a default, and two of them are worth choosing rather
+    /// than accepting. `currency` defaults to EUR and is the currency of every
+    /// amount in the list, since entries carry none; a resolve call only considers
+    /// lists in the currency it is asked about, and nothing is ever converted.
+    /// `tax_basis` defaults to NOTHING, which means the amounts inherit the
+    /// tenant's `tax_inclusive_default` — state net or gross here and the answer
+    /// stops depending on a tenant setting somebody may change later.
+    /// 
+    /// `is_default: true` here does NOT demote the list that currently holds the
+    /// flag: you end up with two defaults, and which of them prices an item is
+    /// left to the tenant's tie-break. Create the list, then move the flag with
+    /// `POST /prices/lists/{list_id}/make-default`.
+    /// 
+    /// A new list prices nothing at all until it has entries, so it is inert until
+    /// you add them — which makes it safe to create one ahead of the prices that
+    /// will fill it.
+    pub async fn prices_lists_create(&self, code: String, name: String, channel_id: Option<String>, contact_id: Option<String>, currency: Option<String>, description: Option<String>, is_default: Option<bool>, labels: Option<serde_json::Value>, metadata: Option<serde_json::Value>, organization_id: Option<String>, priority: Option<i64>, requires_auth: Option<bool>, status: Option<String>, tax_basis: Option<String>, tax_included: Option<bool>, valid_from: Option<String>, valid_until: Option<String>) -> Result<crate::models::Error, Error> {
         let api_path = "/v1/prices/lists".to_string();
 
         let mut api_params: HashMap<String, Value> = HashMap::new();
@@ -57,9 +157,6 @@ impl Prices {
         if let Some(value) = &labels {
             api_params.insert("labels".to_string(), serde_json::to_value(value)?);
         }
-        if let Some(value) = &market_id {
-            api_params.insert("market_id".to_string(), serde_json::to_value(value)?);
-        }
         if let Some(value) = &metadata {
             api_params.insert("metadata".to_string(), serde_json::to_value(value)?);
         }
@@ -69,8 +166,14 @@ impl Prices {
         if let Some(value) = &priority {
             api_params.insert("priority".to_string(), serde_json::to_value(value)?);
         }
+        if let Some(value) = &requires_auth {
+            api_params.insert("requires_auth".to_string(), serde_json::to_value(value)?);
+        }
         if let Some(value) = &status {
             api_params.insert("status".to_string(), serde_json::to_value(value)?);
+        }
+        if let Some(value) = &tax_basis {
+            api_params.insert("tax_basis".to_string(), serde_json::to_value(value)?);
         }
         if let Some(value) = &tax_included {
             api_params.insert("tax_included".to_string(), serde_json::to_value(value)?);
@@ -92,7 +195,26 @@ impl Prices {
 
         Ok(serde_json::from_slice(&api_response.body)?)
     }
-    pub async fn prices_lists_defaults(&self) -> Result<serde_json::Value, Error> {
+    /// Gives a tenant the one open list every tenant needs, so nothing has to
+    /// exist before the first price can be written. Almost nobody calls it: the
+    /// app runs it by itself on `app.installed`, and the route is the manual
+    /// re-run — for a tenant installed before that hook existed, or one whose
+    /// standard list was deleted. Because it is idempotent it is also safe to call
+    /// from a provisioning script that cannot know which of the two is the case.
+    /// 
+    /// What it writes comes from settings, not from constants: the code is the
+    /// tenant's `default_price_list_code`, the currency its `default_currency`,
+    /// and the seeded list STATES its tax basis from `tax_inclusive_default`
+    /// instead of inheriting it, because the one list every tenant gets should not
+    /// be the ambiguous one.
+    /// 
+    /// Idempotent twice over — by that code, and by the existence of ANY default
+    /// list. So calling it repeatedly is free, changing `default_price_list_code`
+    /// later never produces a second list, and a tenant that has made some other
+    /// list the default is left exactly as it is (the answer names that list under
+    /// `existing`). It writes nothing else: it never demotes, never touches
+    /// entries, and never repairs a list that is already there.
+    pub async fn prices_lists_defaults(&self) -> Result<crate::models::PriceListDefaultsResponse, Error> {
         let api_path = "/v1/prices/lists/defaults".to_string();
 
         let mut api_params: HashMap<String, Value> = HashMap::new();
@@ -104,13 +226,27 @@ impl Prices {
             .call("POST", &api_path, api_headers, api_params)
             .await?;
 
-        if api_response.body.is_empty() {
-            Ok(serde_json::Value::Null)
-        } else {
-            Ok(serde_json::from_slice(&api_response.body)?)
-        }
+        Ok(serde_json::from_slice(&api_response.body)?)
     }
-    pub async fn prices_lists_delete(&self, id: String) -> Result<serde_json::Value, Error> {
+    /// Deletes the list AND every price in it. `price_entries.price_list_id`
+    /// references this row ON DELETE CASCADE, so the entries go in the same
+    /// statement: nothing asks, nothing blocks, a book of 40 000 prices deletes
+    /// exactly as fast as an empty one, and the answer is a bare `{deleted, id}`
+    /// that never says how many prices went with it.
+    /// 
+    /// What that means while a storefront is quoting: from the next resolve call
+    /// the items this list priced fall through to the next candidate list, and
+    /// where there is none the answer is `on_request` — "price on request" for
+    /// something that had a price a second ago, never €0. If the deleted list
+    /// held the default flag the tenant has no default until one is moved onto
+    /// another list; re-running `POST /prices/lists/defaults` recreates the
+    /// standard list only while no other default exists.
+    /// 
+    /// This is not the way to take a list out of circulation. `status: "inactive"`
+    /// does that immediately and reversibly and keeps the prices; deleting is for
+    /// a list whose contents you are prepared to import again, because nothing
+    /// here is recoverable.
+    pub async fn prices_lists_delete(&self, id: String) -> Result<crate::models::Error, Error> {
         let api_path = "/v1/prices/lists/{id}".replace("{id}", &id.to_string());
 
         let mut api_params: HashMap<String, Value> = HashMap::new();
@@ -123,13 +259,17 @@ impl Prices {
             .call("DELETE", &api_path, api_headers, api_params)
             .await?;
 
-        if api_response.body.is_empty() {
-            Ok(serde_json::Value::Null)
-        } else {
-            Ok(serde_json::from_slice(&api_response.body)?)
-        }
+        Ok(serde_json::from_slice(&api_response.body)?)
     }
-    pub async fn prices_lists_get(&self, id: String) -> Result<crate::models::PriceList, Error> {
+    /// The list HEADER, never its prices: currency, tax basis, buyer scope,
+    /// priority, validity window and the default flag — the settings that decide
+    /// WHETHER this list prices a given buyer, before any amount is looked at. Its
+    /// entries are a separate page (`GET /prices/lists/{list_id}/entries`),
+    /// because a price book runs to thousands of rows and no read of a list should
+    /// carry them. This is the admin view and it reads the base table rather than
+    /// the market-scoped one the resolve call uses, so a list that is invisible in
+    /// the active market is still returned here.
+    pub async fn prices_lists_get(&self, id: String) -> Result<crate::models::Error, Error> {
         let api_path = "/v1/prices/lists/{id}".replace("{id}", &id.to_string());
 
         let mut api_params: HashMap<String, Value> = HashMap::new();
@@ -144,7 +284,24 @@ impl Prices {
 
         Ok(serde_json::from_slice(&api_response.body)?)
     }
-    pub async fn prices_lists_update(&self, id: String, channel_id: Option<String>, code: Option<String>, contact_id: Option<String>, currency: Option<String>, description: Option<String>, is_default: Option<bool>, labels: Option<serde_json::Value>, market_id: Option<String>, metadata: Option<serde_json::Value>, name: Option<String>, organization_id: Option<String>, priority: Option<i64>, status: Option<String>, tax_included: Option<bool>, valid_from: Option<String>, valid_until: Option<String>) -> Result<crate::models::PriceList, Error> {
+    /// A partial update: send only what changes, omitted fields keep their value,
+    /// and a payload with no updatable column at all is refused rather than
+    /// answered with an unchanged row. There is no draft and no publish step —
+    /// the next resolve call reads what this one wrote.
+    /// 
+    /// Three edits do more than their field names suggest. `currency`
+    /// re-denominates without converting: entries carry no currency of their own,
+    /// so 19.90 EUR becomes 19.90 CHF and the whole book is re-priced by one edit.
+    /// `status: "inactive"` takes the list out of every quote immediately while
+    /// keeping its prices — the reversible way to stop selling on a list, and
+    /// the one to reach for instead of deleting it. `code` is the handle imports
+    /// and integrations address the list by, and a code another list already holds
+    /// is a 409.
+    /// 
+    /// `is_default` behaves here exactly as it does on create: setting it true
+    /// leaves the incumbent default in place, so use `POST
+    /// /prices/lists/{list_id}/make-default`, which demotes in the same call.
+    pub async fn prices_lists_update(&self, id: String, channel_id: Option<String>, code: Option<String>, contact_id: Option<String>, currency: Option<String>, description: Option<String>, is_default: Option<bool>, labels: Option<serde_json::Value>, metadata: Option<serde_json::Value>, name: Option<String>, organization_id: Option<String>, priority: Option<i64>, requires_auth: Option<bool>, status: Option<String>, tax_basis: Option<String>, tax_included: Option<bool>, valid_from: Option<String>, valid_until: Option<String>) -> Result<crate::models::Error, Error> {
         let api_path = "/v1/prices/lists/{id}".replace("{id}", &id.to_string());
 
         let mut api_params: HashMap<String, Value> = HashMap::new();
@@ -170,9 +327,6 @@ impl Prices {
         if let Some(value) = &labels {
             api_params.insert("labels".to_string(), serde_json::to_value(value)?);
         }
-        if let Some(value) = &market_id {
-            api_params.insert("market_id".to_string(), serde_json::to_value(value)?);
-        }
         if let Some(value) = &metadata {
             api_params.insert("metadata".to_string(), serde_json::to_value(value)?);
         }
@@ -185,8 +339,14 @@ impl Prices {
         if let Some(value) = &priority {
             api_params.insert("priority".to_string(), serde_json::to_value(value)?);
         }
+        if let Some(value) = &requires_auth {
+            api_params.insert("requires_auth".to_string(), serde_json::to_value(value)?);
+        }
         if let Some(value) = &status {
             api_params.insert("status".to_string(), serde_json::to_value(value)?);
+        }
+        if let Some(value) = &tax_basis {
+            api_params.insert("tax_basis".to_string(), serde_json::to_value(value)?);
         }
         if let Some(value) = &tax_included {
             api_params.insert("tax_included".to_string(), serde_json::to_value(value)?);
@@ -208,11 +368,66 @@ impl Prices {
 
         Ok(serde_json::from_slice(&api_response.body)?)
     }
-    pub async fn prices_entries_list(&self, list_id: String) -> Result<serde_json::Value, Error> {
-        let api_path = "/v1/prices/lists/{list_id}/entries".replace("{listId}", &list_id.to_string());
+    /// The prices inside one list, a page at a time. An entry is a rung rather
+    /// than "the price of a product": it carries a quantity threshold, an amount
+    /// and a unit, its own validity window, and — where the answer is
+    /// deliberately no number at all — an `on_request` marker instead of one. So
+    /// this page is where the quantity tiers, the promo windows and the "ask us"
+    /// markers of a book are read.
+    /// 
+    /// The ladder of one item is the set of entries sharing an identity, so
+    /// `?product_id=…` (or `?sku=…`) is how a caller reads the Staffel a
+    /// resolve answer was built from, and `?price_type=on_request` is how the
+    /// markers are audited. The response also carries `page` and `filter` like
+    /// every other list, and an unknown list_id answers 404 instead of an empty
+    /// page.
+    pub async fn prices_entries_list(&self, list_id: String, id: Option<String>, product_id: Option<String>, sku: Option<String>, price_type: Option<String>, quantity_min: Option<f64>, unit_price: Option<f64>, unit: Option<String>, valid_from: Option<String>, valid_until: Option<String>, created_at: Option<String>, updated_at: Option<String>, limit: Option<i64>, offset: Option<i64>, order: Option<String>) -> Result<crate::models::Error, Error> {
+        let api_path = "/v1/prices/lists/{list_id}/entries".replace("{list_id}", &list_id.to_string());
 
         let mut api_params: HashMap<String, Value> = HashMap::new();
         api_params.insert("list_id".to_string(), serde_json::to_value(&list_id)?);
+        if let Some(value) = &id {
+            api_params.insert("id".to_string(), serde_json::to_value(value)?);
+        }
+        if let Some(value) = &product_id {
+            api_params.insert("product_id".to_string(), serde_json::to_value(value)?);
+        }
+        if let Some(value) = &sku {
+            api_params.insert("sku".to_string(), serde_json::to_value(value)?);
+        }
+        if let Some(value) = &price_type {
+            api_params.insert("price_type".to_string(), serde_json::to_value(value)?);
+        }
+        if let Some(value) = &quantity_min {
+            api_params.insert("quantity_min".to_string(), serde_json::to_value(value)?);
+        }
+        if let Some(value) = &unit_price {
+            api_params.insert("unit_price".to_string(), serde_json::to_value(value)?);
+        }
+        if let Some(value) = &unit {
+            api_params.insert("unit".to_string(), serde_json::to_value(value)?);
+        }
+        if let Some(value) = &valid_from {
+            api_params.insert("valid_from".to_string(), serde_json::to_value(value)?);
+        }
+        if let Some(value) = &valid_until {
+            api_params.insert("valid_until".to_string(), serde_json::to_value(value)?);
+        }
+        if let Some(value) = &created_at {
+            api_params.insert("created_at".to_string(), serde_json::to_value(value)?);
+        }
+        if let Some(value) = &updated_at {
+            api_params.insert("updated_at".to_string(), serde_json::to_value(value)?);
+        }
+        if let Some(value) = &limit {
+            api_params.insert("limit".to_string(), serde_json::to_value(value)?);
+        }
+        if let Some(value) = &offset {
+            api_params.insert("offset".to_string(), serde_json::to_value(value)?);
+        }
+        if let Some(value) = &order {
+            api_params.insert("order".to_string(), serde_json::to_value(value)?);
+        }
 
         let mut api_headers: HashMap<String, String> = HashMap::new();
 
@@ -221,14 +436,33 @@ impl Prices {
             .call("GET", &api_path, api_headers, api_params)
             .await?;
 
-        if api_response.body.is_empty() {
-            Ok(serde_json::Value::Null)
-        } else {
-            Ok(serde_json::from_slice(&api_response.body)?)
-        }
+        Ok(serde_json::from_slice(&api_response.body)?)
     }
-    pub async fn prices_entries_create(&self, list_id: String, metadata: Option<serde_json::Value>, price_type: Option<String>, product_id: Option<String>, quantity_min: Option<f64>, sku: Option<String>, unit: Option<String>, unit_price: Option<f64>, valid_from: Option<String>, valid_until: Option<String>) -> Result<crate::models::PriceEntry, Error> {
-        let api_path = "/v1/prices/lists/{list_id}/entries".replace("{listId}", &list_id.to_string());
+    /// Adds ONE rung to one item's quantity ladder in this list. The only thing an
+    /// entry must have is an identity — `product_id` or `sku`, which the row
+    /// CHECK enforces; everything else defaults, and one of those defaults
+    /// deserves a warning.
+    /// 
+    /// `unit_price` defaults to **0**. That is the one door through which a zero
+    /// price enters an app whose whole doctrine is that a missing price is
+    /// `on_request` and never €0: a create that forgets the amount publishes a
+    /// free item, and the storefront shows 0.00 instead of "price on request".
+    /// Send the amount, or send `price_type: "on_request"` where there genuinely
+    /// is none. The amount is per ONE unit of `unit`, in the LIST's currency
+    /// (entries carry none) and on the LIST's tax basis, as a decimal in major
+    /// units — 19.90, never 1990.
+    /// 
+    /// Nothing enforces one rung per (item, quantity): create the same
+    /// `quantity_min` twice and both rows come back in the resolved `tiers`, with
+    /// the last of them setting the price — an ambiguous ladder no error ever
+    /// mentions. `quantity_min` defaults to 1 and `price_type` to `standard`.
+    /// 
+    /// This route is for a rung at a time. A whole ladder in one call is `POST
+    /// …/entries/ladder`, an import is `POST …/entries/bulk`, and a complete
+    /// rewrite of the book is `PUT …/entries`. An unknown `list_id` answers 404
+    /// rather than attaching a price to nothing.
+    pub async fn prices_entries_create(&self, list_id: String, metadata: Option<serde_json::Value>, price_type: Option<String>, product_id: Option<String>, quantity_min: Option<f64>, sku: Option<String>, unit: Option<String>, unit_price: Option<f64>, valid_from: Option<String>, valid_until: Option<String>) -> Result<crate::models::Error, Error> {
+        let api_path = "/v1/prices/lists/{list_id}/entries".replace("{list_id}", &list_id.to_string());
 
         let mut api_params: HashMap<String, Value> = HashMap::new();
         api_params.insert("list_id".to_string(), serde_json::to_value(&list_id)?);
@@ -270,8 +504,26 @@ impl Prices {
 
         Ok(serde_json::from_slice(&api_response.body)?)
     }
-    pub async fn prices_entries_replace(&self, list_id: String, entries: Vec<crate::models::PriceEntryReplaceItem>) -> Result<serde_json::Value, Error> {
-        let api_path = "/v1/prices/lists/{list_id}/entries".replace("{listId}", &list_id.to_string());
+    /// Set semantics over the WHOLE list, not over one item: every entry of the
+    /// list is deleted and the payload becomes the complete new book. It exists
+    /// for the two callers that genuinely hold the whole book in hand — the
+    /// Cockpit's table editor, whose save is this call, and a small import.
+    /// `entries: []` is a legal payload and empties the list — the items it
+    /// priced then resolve from the next candidate list, or come back
+    /// `on_request`.
+    /// 
+    /// Two consequences of "delete, then insert". Every row is inserted fresh, so
+    /// all entry ids change and anything holding one is stale afterwards. And it
+    /// is not a transaction: the deletes go out before the inserts, so a payload
+    /// that fails part-way through leaves the list holding the rows that landed
+    /// and none of the ones it had. What protects you is that the whole payload is
+    /// normalized and validated BEFORE the first delete — a malformed row is a
+    /// 400 with the list untouched.
+    /// 
+    /// For a book of any size, or for adding to one you want to keep, use `POST
+    /// …/entries/bulk`: it upserts in chunks and never wipes.
+    pub async fn prices_entries_replace(&self, list_id: String, entries: Vec<crate::models::PriceEntryReplaceItem>) -> Result<crate::models::Error, Error> {
+        let api_path = "/v1/prices/lists/{list_id}/entries".replace("{list_id}", &list_id.to_string());
 
         let mut api_params: HashMap<String, Value> = HashMap::new();
         api_params.insert("list_id".to_string(), serde_json::to_value(&list_id)?);
@@ -285,18 +537,42 @@ impl Prices {
             .call("PUT", &api_path, api_headers, api_params)
             .await?;
 
-        if api_response.body.is_empty() {
-            Ok(serde_json::Value::Null)
-        } else {
-            Ok(serde_json::from_slice(&api_response.body)?)
-        }
+        Ok(serde_json::from_slice(&api_response.body)?)
     }
-    pub async fn prices_entries_bulk(&self, list_id: String, entries: Vec<crate::models::PriceEntryReplaceItem>) -> Result<serde_json::Value, Error> {
-        let api_path = "/v1/prices/lists/{list_id}/entries/bulk".replace("{listId}", &list_id.to_string());
+    /// Moves every priced entry of the list at once, in whichever of the two ways
+    /// a merchant thinks about a price change: `percent` for a relative one (5
+    /// raises everything by 5 %) or `amount` for a flat one added to every unit
+    /// price. One or the other, never both, and `sku_prefix` narrows the change to
+    /// part of the book. On-request entries are never touched, because a
+    /// percentage of "ask us" is not a number.
+    /// 
+    /// The other half of a bulk change is what the arithmetic leaves behind: a 7 %
+    /// increase turns 19.90 into 21.293, which no merchant prints. Results are
+    /// therefore rounded to the tenant's price_precision/rounding_mode and then
+    /// snapped to a declared merchant price ending — x.99, x.95, a whole number
+    /// — either the one this call names or the tenant's `bulk_adjust_rounding`.
+    /// dry_run answers the same preview and writes nothing, which is what the
+    /// Cockpit dialog shows before it commits.
+    pub async fn prices_entries_adjust(&self, list_id: String, amount: Option<f64>, dry_run: Option<bool>, percent: Option<f64>, rounding: Option<String>, sku_prefix: Option<String>) -> Result<crate::models::Error, Error> {
+        let api_path = "/v1/prices/lists/{list_id}/entries/adjust".replace("{list_id}", &list_id.to_string());
 
         let mut api_params: HashMap<String, Value> = HashMap::new();
         api_params.insert("list_id".to_string(), serde_json::to_value(&list_id)?);
-        api_params.insert("entries".to_string(), serde_json::to_value(&entries)?);
+        if let Some(value) = &amount {
+            api_params.insert("amount".to_string(), serde_json::to_value(value)?);
+        }
+        if let Some(value) = &dry_run {
+            api_params.insert("dry_run".to_string(), serde_json::to_value(value)?);
+        }
+        if let Some(value) = &percent {
+            api_params.insert("percent".to_string(), serde_json::to_value(value)?);
+        }
+        if let Some(value) = &rounding {
+            api_params.insert("rounding".to_string(), serde_json::to_value(value)?);
+        }
+        if let Some(value) = &sku_prefix {
+            api_params.insert("sku_prefix".to_string(), serde_json::to_value(value)?);
+        }
 
         let mut api_headers: HashMap<String, String> = HashMap::new();
         api_headers.insert("content-type".to_string(), "application/json".to_string());
@@ -306,14 +582,103 @@ impl Prices {
             .call("POST", &api_path, api_headers, api_params)
             .await?;
 
-        if api_response.body.is_empty() {
-            Ok(serde_json::Value::Null)
-        } else {
-            Ok(serde_json::from_slice(&api_response.body)?)
-        }
+        Ok(serde_json::from_slice(&api_response.body)?)
     }
-    pub async fn prices_entries_delete(&self, list_id: String, id: String) -> Result<serde_json::Value, Error> {
-        let api_path = "/v1/prices/lists/{list_id}/entries/{id}".replace("{listId}", &list_id.to_string()).replace("{id}", &id.to_string());
+    /// Adds entries to a list without wiping it, and UPSERTS rather than inserts:
+    /// a row naming a rung the list already has (same product_id/sku AND
+    /// quantity_min) updates that rung, so re-running an import corrects prices
+    /// instead of duplicating the ladder. `mode: 'append'` keeps the old
+    /// insert-everything behaviour. Inserts go out as one PostgREST bulk write per
+    /// 1000 rows.
+    /// 
+    /// This is the route for a large price book, and a large book arrives in
+    /// chunks: a call carries at most 5000 entries and a longer payload is refused
+    /// with 400 rather than truncated, so an importer of 200 000 prices sends
+    /// forty calls. Because the upsert is keyed on the rung rather than on a row
+    /// id, the chunks may be re-sent and re-ordered freely — a chunk that lands
+    /// twice writes the same prices twice.
+    pub async fn prices_entries_bulk(&self, list_id: String, entries: Vec<crate::models::PriceEntryReplaceItem>, mode: Option<String>) -> Result<crate::models::Error, Error> {
+        let api_path = "/v1/prices/lists/{list_id}/entries/bulk".replace("{list_id}", &list_id.to_string());
+
+        let mut api_params: HashMap<String, Value> = HashMap::new();
+        api_params.insert("list_id".to_string(), serde_json::to_value(&list_id)?);
+        api_params.insert("entries".to_string(), serde_json::to_value(&entries)?);
+        if let Some(value) = &mode {
+            api_params.insert("mode".to_string(), serde_json::to_value(value)?);
+        }
+
+        let mut api_headers: HashMap<String, String> = HashMap::new();
+        api_headers.insert("content-type".to_string(), "application/json".to_string());
+
+        let api_response = self
+            .client
+            .call("POST", &api_path, api_headers, api_params)
+            .await?;
+
+        Ok(serde_json::from_slice(&api_response.body)?)
+    }
+    /// Writes a whole quantity-tier ladder (Staffelpreise) for ONE item in one
+    /// call, instead of typing a rung at a time. Tiers are a flat quantity_min
+    /// column on purpose — the ladder IS the set of entries sharing an identity,
+    /// and resolve returns it sorted as one array. What was missing was the
+    /// gesture: "19.90 from 1, 5 % off per tier at 10 and 50". Prices are rounded
+    /// and snapped exactly as a bulk adjust is.
+    pub async fn prices_entries_ladder(&self, list_id: String, base_price: f64, discount_percent: Option<f64>, product_id: Option<String>, quantities: Option<Vec<f64>>, replace: Option<bool>, rounding: Option<String>, sku: Option<String>, unit: Option<String>) -> Result<crate::models::Error, Error> {
+        let api_path = "/v1/prices/lists/{list_id}/entries/ladder".replace("{list_id}", &list_id.to_string());
+
+        let mut api_params: HashMap<String, Value> = HashMap::new();
+        api_params.insert("list_id".to_string(), serde_json::to_value(&list_id)?);
+        api_params.insert("base_price".to_string(), serde_json::to_value(&base_price)?);
+        if let Some(value) = &discount_percent {
+            api_params.insert("discount_percent".to_string(), serde_json::to_value(value)?);
+        }
+        if let Some(value) = &product_id {
+            api_params.insert("product_id".to_string(), serde_json::to_value(value)?);
+        }
+        if let Some(value) = &quantities {
+            api_params.insert("quantities".to_string(), serde_json::to_value(value)?);
+        }
+        if let Some(value) = &replace {
+            api_params.insert("replace".to_string(), serde_json::to_value(value)?);
+        }
+        if let Some(value) = &rounding {
+            api_params.insert("rounding".to_string(), serde_json::to_value(value)?);
+        }
+        if let Some(value) = &sku {
+            api_params.insert("sku".to_string(), serde_json::to_value(value)?);
+        }
+        if let Some(value) = &unit {
+            api_params.insert("unit".to_string(), serde_json::to_value(value)?);
+        }
+
+        let mut api_headers: HashMap<String, String> = HashMap::new();
+        api_headers.insert("content-type".to_string(), "application/json".to_string());
+
+        let api_response = self
+            .client
+            .call("POST", &api_path, api_headers, api_params)
+            .await?;
+
+        Ok(serde_json::from_slice(&api_response.body)?)
+    }
+    /// Removes ONE rung. The item keeps its other rungs and stays priced — which
+    /// is exactly what makes the lowest rung the dangerous one to delete.
+    /// 
+    /// Below the first threshold the FIRST rung's price applies (a minimum
+    /// quantity belongs to the catalog, not to the price ladder). So deleting the
+    /// "from 1" rung of a 1/10/50 ladder does not make single units unpriced: it
+    /// sells them at the 10-up volume price, silently, from the next resolve call
+    /// onwards. Nothing in the answer marks that the ladder no longer starts where
+    /// it used to.
+    /// 
+    /// Delete an item's LAST rung and this list stops pricing it altogether: the
+    /// item falls through to the next candidate list, or comes back `on_request`
+    /// — never €0. To retire a price without losing it, set the rung's
+    /// `price_type` to `on_request` instead, or deactivate the list. An entry
+    /// belonging to another list answers 404 rather than being deleted through the
+    /// wrong parent.
+    pub async fn prices_entries_delete(&self, list_id: String, id: String) -> Result<crate::models::Error, Error> {
+        let api_path = "/v1/prices/lists/{list_id}/entries/{id}".replace("{list_id}", &list_id.to_string()).replace("{id}", &id.to_string());
 
         let mut api_params: HashMap<String, Value> = HashMap::new();
         api_params.insert("list_id".to_string(), serde_json::to_value(&list_id)?);
@@ -326,14 +691,19 @@ impl Prices {
             .call("DELETE", &api_path, api_headers, api_params)
             .await?;
 
-        if api_response.body.is_empty() {
-            Ok(serde_json::Value::Null)
-        } else {
-            Ok(serde_json::from_slice(&api_response.body)?)
-        }
+        Ok(serde_json::from_slice(&api_response.body)?)
     }
-    pub async fn prices_entries_get(&self, list_id: String, id: String) -> Result<crate::models::PriceEntry, Error> {
-        let api_path = "/v1/prices/lists/{list_id}/entries/{id}".replace("{listId}", &list_id.to_string()).replace("{id}", &id.to_string());
+    /// One rung of one ladder, exactly as stored — nothing is rounded, converted
+    /// or taxed on the way out. `unit_price` is per ONE unit of `unit`, in the
+    /// LIST's currency and on the LIST's tax basis; the entry itself carries
+    /// neither, which is why a rung read on its own is not yet a price you can
+    /// show a buyer. `POST /prices/resolve` is what turns it into one: it picks
+    /// the rung that applies to a quantity, names the basis, and adds the
+    /// net/gross pair and the tax rate. The id is checked against the list in the
+    /// path, so an entry belonging to another list answers 404 rather than being
+    /// read through the wrong parent.
+    pub async fn prices_entries_get(&self, list_id: String, id: String) -> Result<crate::models::Error, Error> {
+        let api_path = "/v1/prices/lists/{list_id}/entries/{id}".replace("{list_id}", &list_id.to_string()).replace("{id}", &id.to_string());
 
         let mut api_params: HashMap<String, Value> = HashMap::new();
         api_params.insert("list_id".to_string(), serde_json::to_value(&list_id)?);
@@ -348,8 +718,24 @@ impl Prices {
 
         Ok(serde_json::from_slice(&api_response.body)?)
     }
-    pub async fn prices_entries_update(&self, list_id: String, id: String, metadata: Option<serde_json::Value>, price_type: Option<String>, product_id: Option<String>, quantity_min: Option<f64>, sku: Option<String>, unit: Option<String>, unit_price: Option<f64>, valid_from: Option<String>, valid_until: Option<String>) -> Result<crate::models::PriceEntry, Error> {
-        let api_path = "/v1/prices/lists/{list_id}/entries/{id}".replace("{listId}", &list_id.to_string()).replace("{id}", &id.to_string());
+    /// A partial update of one rung: send only what changes, a payload with no
+    /// updatable column at all is refused, and the next resolve call reads what
+    /// this one wrote.
+    /// 
+    /// Two edits reach further than the field they touch. Moving `quantity_min`
+    /// moves the rung within the ladder and may land on a threshold the item
+    /// already has — nothing stops it, and both rows then sit in the resolved
+    /// `tiers`. Setting `price_type: "on_request"` on ONE rung takes the WHOLE
+    /// item off price in this list: resolution stops there and answers "price on
+    /// request" even though the other rungs still carry amounts, and even where a
+    /// less specific list would have priced it. That is the intended way to say
+    /// "ask us" for an item, and a surprise if you meant to retire a single tier.
+    /// 
+    /// What this route cannot change is what the amount MEANS: currency and tax
+    /// basis belong to the list, so re-denominating or switching net/gross is a
+    /// list edit, not an entry edit. An entry of another list answers 404.
+    pub async fn prices_entries_update(&self, list_id: String, id: String, metadata: Option<serde_json::Value>, price_type: Option<String>, product_id: Option<String>, quantity_min: Option<f64>, sku: Option<String>, unit: Option<String>, unit_price: Option<f64>, valid_from: Option<String>, valid_until: Option<String>) -> Result<crate::models::Error, Error> {
+        let api_path = "/v1/prices/lists/{list_id}/entries/{id}".replace("{list_id}", &list_id.to_string()).replace("{id}", &id.to_string());
 
         let mut api_params: HashMap<String, Value> = HashMap::new();
         api_params.insert("list_id".to_string(), serde_json::to_value(&list_id)?);
@@ -392,7 +778,110 @@ impl Prices {
 
         Ok(serde_json::from_slice(&api_response.body)?)
     }
-    pub async fn prices_resolve(&self, items: Vec<crate::models::PriceResolveItem>, at: Option<String>, channel_id: Option<String>, contact_id: Option<String>, currency: Option<String>, market_id: Option<String>, organization_id: Option<String>) -> Result<serde_json::Value, Error> {
+    /// Promotes this list AND demotes whoever held the flag, in one call. The flag
+    /// is a single answer, not a per-row opinion: resolution uses it as the last
+    /// tie-break, so two defaults leave the winner to row order and none leaves a
+    /// tie unsettled. Promote-then-demote as two PATCHes from a client produces
+    /// exactly those two states whenever the second call does not land.
+    /// 
+    /// The write is as small as the change: exactly one write per row whose flag
+    /// was wrong, and none at all for the rows that were already right. A tenant
+    /// already in this state is therefore not written to, which is what makes
+    /// repeating the call free. The answer is this list as it now stands plus the
+    /// codes it demoted — empty when it already held the flag.
+    pub async fn prices_lists_make_default(&self, list_id: String, data: serde_json::Value) -> Result<crate::models::Error, Error> {
+        let api_path = "/v1/prices/lists/{list_id}/make-default".replace("{list_id}", &list_id.to_string());
+
+        let mut api_params: HashMap<String, Value> = HashMap::new();
+        api_params.insert("list_id".to_string(), serde_json::to_value(&list_id)?);
+        api_params.insert("data".to_string(), serde_json::to_value(&data)?);
+
+        let mut api_headers: HashMap<String, String> = HashMap::new();
+        api_headers.insert("content-type".to_string(), "application/json".to_string());
+
+        let api_response = self
+            .client
+            .call("POST", &api_path, api_headers, api_params)
+            .await?;
+
+        Ok(serde_json::from_slice(&api_response.body)?)
+    }
+    /// The live price call. Everything else in this app configures prices; this is
+    /// the one route that ANSWERS them, and a storefront reaches it on every
+    /// listing, every product page and every cart. Send up to 200 items and the
+    /// buyer context they are for — contact, organization, market and channel
+    /// — and get back, per item, the unit price this buyer pays, the net/gross
+    /// pair, the tax rate, the list that decided it and that item's full quantity
+    /// ladder.
+    /// 
+    /// Which price wins when several match is the whole value of this app, and it
+    /// is not guessable from the field types. The order, in full:
+    /// 
+    /// 1. **Candidates.** A list is a candidate when it is `active`, its currency
+    /// EQUALS the currency of the call (nothing is ever converted — a list in
+    /// another currency simply does not price the item), the instant `at` falls
+    /// inside its validity window, it is visible in the buyer’s market (the
+    /// `X-Revenexx-Market` header scopes the list view; lists assigned to no
+    /// market are global and always visible), and its buyer scope matches or is
+    /// open. A `requires_auth` list is dropped for a buyer with neither
+    /// `contact_id` nor `organization_id`.
+    /// 2. **Specificity decides first, and priority never overrules it.**
+    /// contact-scoped (4) beats organization-scoped (3) beats channel-scoped (2)
+    /// beats open (0). An organization list at `priority: 0` therefore wins over
+    /// an open list at `priority: 100`.
+    /// 3. **Within one specificity level:** `priority` descending, then
+    /// non-default before default — the default list is deliberately last, so it
+    /// prices only what nothing else did.
+    /// 4. **A genuine tie** (same specificity, same priority, same default flag)
+    /// is settled by the tenant’s `price_list_priority_tiebreak` setting —
+    /// `lowest_price`, `highest_price`, `newest` or `code` — never by the order
+    /// the database happened to return rows in. The setting in force is echoed in
+    /// `basis.price_list_priority_tiebreak`.
+    /// 5. **The first list that prices the item wins, and the search stops there**
+    /// — even if a later, less specific list is cheaper. Its FULL tier ladder
+    /// comes back in `tiers`; the rung with the highest `quantity_min` at or below
+    /// the requested `quantity` sets `unit_price`, and below the first rung the
+    /// first rung applies.
+    /// 6. **An `on_request` entry stops the search too**, and inside a tie it
+    /// outranks every price: a list that says "ask us" for this buyer is
+    /// authoritative, and cannot be undercut by a list that happens to sort after
+    /// it.
+    /// 7. **Nothing found → `on_request`, never 0**, with a reason
+    /// (`not_priced`, `on_request_entry`, `anonymous_denied`, `no_identity`). A
+    /// storefront shows "price on request"; it must never show €0.
+    /// 
+    /// Amounts: `unit_price` is per ONE unit of the entry’s `unit`, in
+    /// `currency`, as a decimal in MAJOR units (19.90) — never minor units/cents
+    /// — and on the basis `tax_basis` names. `tax_basis` comes from the list’s
+    /// own column, else from a legacy `tax_included: true` on it, else from the
+    /// tenant’s `tax_inclusive_default`; `tax_basis_source` says which of the
+    /// three. Read `unit_price_net`/`unit_price_gross` where you need an
+    /// unambiguous number.
+    /// 
+    /// Tax is never guessed. The market comes from the `X-Revenexx-Market` header
+    /// (a market CODE) or from `market_id` in the body; with several markets whose
+    /// rates differ and no signal, the answer is `tax.resolved: false`, `reason:
+    /// market_required` rather than another market’s VAT. `tax_rate: null` means
+    /// UNKNOWN, not 0 %.
+    /// 
+    /// An item that cannot be priced never fails the call: it comes back
+    /// on_request with its reason, so one bad line in a cart does not cost the
+    /// other lines their prices.
+    /// 
+    /// One last thing worth knowing before you build on it. This is the most
+    /// customised surface this app has in the field: pricing is where a tenant's
+    /// ERP usually has the last word, and a tenant whose prices are computed there
+    /// does not want this app's resolution order at all. So the route is
+    /// deliberately shaped to be REPLACED — one required field, no rejection of
+    /// an item the caller got wrong, an answer that stands on its own — and it
+    /// is designed to be swapped 1:1 for a custom app through the gateway's
+    /// capability override. An ERP-priced tenant overrides `prices.resolve` alone:
+    /// the same path, the same request and the same response, answered by their
+    /// own service, while every configuration route here (lists, entries, ladders,
+    /// bulk changes, vocabularies) stays standard and keeps working. That is why
+    /// the contract below is smaller than the machinery behind it, and why it
+    /// changes reluctantly.
+    pub async fn prices_resolve(&self, items: Vec<crate::models::PriceResolveItem>, at: Option<String>, channel_id: Option<String>, contact_id: Option<String>, currency: Option<String>, market_id: Option<String>, organization_id: Option<String>) -> Result<crate::models::Error, Error> {
         let api_path = "/v1/prices/resolve".to_string();
 
         let mut api_params: HashMap<String, Value> = HashMap::new();
@@ -424,10 +913,52 @@ impl Prices {
             .call("POST", &api_path, api_headers, api_params)
             .await?;
 
-        if api_response.body.is_empty() {
-            Ok(serde_json::Value::Null)
-        } else {
-            Ok(serde_json::from_slice(&api_response.body)?)
-        }
+        Ok(serde_json::from_slice(&api_response.body)?)
+    }
+    /// Discovery for the vocabulary routes: the enums this app enforces, each with
+    /// its name, its title and its description — and deliberately WITHOUT its
+    /// values, so a UI can cache this one small answer and then fetch only the
+    /// value sets it actually renders. Names: list-statuses, price-types,
+    /// tax-bases. Fetch one with GET /prices/vocabularies/{name}; a client holding
+    /// the qualified pair 'prices.<name>' builds that URL from the pair alone.
+    pub async fn prices_vocabularies_list(&self) -> Result<crate::models::PriceVocabularyIndex, Error> {
+        let api_path = "/v1/prices/vocabularies".to_string();
+
+        let mut api_params: HashMap<String, Value> = HashMap::new();
+
+        let mut api_headers: HashMap<String, String> = HashMap::new();
+
+        let api_response = self
+            .client
+            .call("GET", &api_path, api_headers, api_params)
+            .await?;
+
+        Ok(serde_json::from_slice(&api_response.body)?)
+    }
+    /// One vocabulary in full: every permitted value, each with the title and
+    /// description a human reads for it and the badge tone a UI colours it with
+    /// — enough to render a select or a status chip without keeping a private
+    /// copy of an enum this app enforces. The values are read out of the column's
+    /// CHECK constraint, so the served set IS the enforced set and the two cannot
+    /// drift — a value added to the constraint appears here even before anyone
+    /// labels it, titled from its own key. Values come back in constraint order,
+    /// which is the order a select should offer. 'closed' says the set is
+    /// exhaustive, so a value outside it is stale data rather than a missing
+    /// label. Answers 404 for an unknown name. Names: list-statuses, price-types,
+    /// tax-bases.
+    pub async fn prices_vocabularies_get(&self, name: String) -> Result<crate::models::Error, Error> {
+        let api_path = "/v1/prices/vocabularies/{name}".replace("{name}", &name.to_string());
+
+        let mut api_params: HashMap<String, Value> = HashMap::new();
+        api_params.insert("name".to_string(), serde_json::to_value(&name)?);
+
+        let mut api_headers: HashMap<String, String> = HashMap::new();
+
+        let api_response = self
+            .client
+            .call("GET", &api_path, api_headers, api_params)
+            .await?;
+
+        Ok(serde_json::from_slice(&api_response.body)?)
     }
 }

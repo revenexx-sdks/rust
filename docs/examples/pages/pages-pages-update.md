@@ -7,11 +7,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let response = client.pages().pages_pages_update(
         "".to_string(),
-        Some("".to_string()),
+        Some("standard".to_string()),
         Some(serde_json::json!({})),
-        Some("".to_string()),
-        Some("".to_string()),
-        Some("".to_string()),
+        Some("about-us".to_string()),
+        Some("draft".to_string()),
+        Some("About us".to_string()),
     ).await?;
 
     println!("{:?}", response);

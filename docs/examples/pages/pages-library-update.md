@@ -7,8 +7,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let response = client.pages().pages_library_update(
         "".to_string(),
-        Some("".to_string()),
-        Some("".to_string()),
+        Some("teaser".to_string()),
+        Some("Newsletter teaser".to_string()),
         Some(serde_json::json!({})),
     ).await?;
 

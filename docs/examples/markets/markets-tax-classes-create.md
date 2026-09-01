@@ -7,12 +7,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let response = client.markets().markets_tax_classes_create(
         "".to_string(),
-        "".to_string(),
-        "".to_string(),
-        Some(false),
-        Some(serde_json::json!({})),
+        "standard".to_string(),
+        "Standard rate".to_string(),
+        Some(true),
+        Some(serde_json::json!({"de-DE":"Regelsatz","en-GB":"Standard rate"})),
         Some(0),
-        Some(0.0),
+        Some(20.0),
     ).await?;
 
     println!("{:?}", response);

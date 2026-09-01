@@ -16,7 +16,7 @@ pub struct Response {
     pub body: Vec<u8>,
 }
 
-/// HTTP client used by every service to talk to the RevenexxAPIRevenexx API.
+/// HTTP client used by every service to talk to the Revenexx API.
 #[derive(Debug, Clone)]
 pub struct Client {
     pub http: reqwest::Client,
@@ -39,14 +39,14 @@ impl Client {
         headers.insert(
             "user-agent".to_string(),
             format!(
-                "RevenexxAPIRevenexxRustSDK/0.0.1 ({})",
+                "RevenexxRustSDK/0.0.2 ({})",
                 std::env::consts::OS
             ),
         );
         headers.insert("x-sdk-name".to_string(), "Revenexx Rust".to_string());
         headers.insert("x-sdk-platform".to_string(), "".to_string());
         headers.insert("x-sdk-language".to_string(), "rust".to_string());
-        headers.insert("x-sdk-version".to_string(), "0.0.1".to_string());
+        headers.insert("x-sdk-version".to_string(), "0.0.2".to_string());
 
         Client {
             http: reqwest::Client::new(),
@@ -87,6 +87,13 @@ impl Client {
         self
     }
 
+    /// Sets the X-Revenexx-Market header, scoping calls to the given market.
+    /// Optional - omit it to see only global rows.
+    pub fn set_market(mut self, value: &str) -> Self {
+        self.headers.insert("X-Revenexx-Market".to_string(), value.to_string());
+        self
+    }
+
     /// A gateway-managed scoped API key (rvxk_…).
     pub fn set_api_key_auth(mut self, value: &str) -> Self {
         self.headers.insert("X-Revenexx-Api-Key".to_string(), value.to_string());
@@ -95,7 +102,8 @@ impl Client {
 
     /// A Zitadel-issued JWT (Cockpit / interactive callers).
     pub fn set_bearer_auth(mut self, value: &str) -> Self {
-        self.headers.insert("Authorization".to_string(), value.to_string());
+        let value = if value.to_lowercase().starts_with("bearer ") { value.to_string() } else { format!("Bearer {}", value) };
+        self.headers.insert("Authorization".to_string(), value);
         self
     }
 
@@ -266,6 +274,12 @@ fn stringify_params(params: &HashMap<String, Value>) -> HashMap<String, String> 
 }
 
 impl Client {
+    /// Access the `health` service.
+    pub fn health(&self) -> crate::services::health::Health {
+        crate::services::health::Health::new(self.clone())
+    }
+}
+impl Client {
     /// Access the `apps` service.
     pub fn apps(&self) -> crate::services::apps::Apps {
         crate::services::apps::Apps::new(self.clone())
@@ -284,9 +298,33 @@ impl Client {
     }
 }
 impl Client {
+    /// Access the `carts.io` service.
+    pub fn carts_io(&self) -> crate::services::carts_io::CartsIo {
+        crate::services::carts_io::CartsIo::new(self.clone())
+    }
+}
+impl Client {
+    /// Access the `carts.items` service.
+    pub fn carts_items(&self) -> crate::services::carts_items::CartsItems {
+        crate::services::carts_items::CartsItems::new(self.clone())
+    }
+}
+impl Client {
     /// Access the `channels` service.
     pub fn channels(&self) -> crate::services::channels::Channels {
         crate::services::channels::Channels::new(self.clone())
+    }
+}
+impl Client {
+    /// Access the `customers.value-lists` service.
+    pub fn customers_value_lists(&self) -> crate::services::customers_value_lists::CustomersValueLists {
+        crate::services::customers_value_lists::CustomersValueLists::new(self.clone())
+    }
+}
+impl Client {
+    /// Access the `customers.organizations` service.
+    pub fn customers_organizations(&self) -> crate::services::customers_organizations::CustomersOrganizations {
+        crate::services::customers_organizations::CustomersOrganizations::new(self.clone())
     }
 }
 impl Client {
@@ -296,15 +334,57 @@ impl Client {
     }
 }
 impl Client {
-    /// Access the `greetings` service.
-    pub fn greetings(&self) -> crate::services::greetings::Greetings {
-        crate::services::greetings::Greetings::new(self.clone())
+    /// Access the `customers.contacts` service.
+    pub fn customers_contacts(&self) -> crate::services::customers_contacts::CustomersContacts {
+        crate::services::customers_contacts::CustomersContacts::new(self.clone())
     }
 }
 impl Client {
-    /// Access the `inventories` service.
-    pub fn inventories(&self) -> crate::services::inventories::Inventories {
-        crate::services::inventories::Inventories::new(self.clone())
+    /// Access the `customers.roles` service.
+    pub fn customers_roles(&self) -> crate::services::customers_roles::CustomersRoles {
+        crate::services::customers_roles::CustomersRoles::new(self.clone())
+    }
+}
+impl Client {
+    /// Access the `customers.segments` service.
+    pub fn customers_segments(&self) -> crate::services::customers_segments::CustomersSegments {
+        crate::services::customers_segments::CustomersSegments::new(self.clone())
+    }
+}
+impl Client {
+    /// Access the `events` service.
+    pub fn events(&self) -> crate::services::events::Events {
+        crate::services::events::Events::new(self.clone())
+    }
+}
+impl Client {
+    /// Access the `forms` service.
+    pub fn forms(&self) -> crate::services::forms::Forms {
+        crate::services::forms::Forms::new(self.clone())
+    }
+}
+impl Client {
+    /// Access the `inventories.stock` service.
+    pub fn inventories_stock(&self) -> crate::services::inventories_stock::InventoriesStock {
+        crate::services::inventories_stock::InventoriesStock::new(self.clone())
+    }
+}
+impl Client {
+    /// Access the `inventories.reservations` service.
+    pub fn inventories_reservations(&self) -> crate::services::inventories_reservations::InventoriesReservations {
+        crate::services::inventories_reservations::InventoriesReservations::new(self.clone())
+    }
+}
+impl Client {
+    /// Access the `inventories.locations` service.
+    pub fn inventories_locations(&self) -> crate::services::inventories_locations::InventoriesLocations {
+        crate::services::inventories_locations::InventoriesLocations::new(self.clone())
+    }
+}
+impl Client {
+    /// Access the `io` service.
+    pub fn io(&self) -> crate::services::io::Io {
+        crate::services::io::Io::new(self.clone())
     }
 }
 impl Client {
@@ -326,9 +406,33 @@ impl Client {
     }
 }
 impl Client {
+    /// Access the `orderlists` service.
+    pub fn orderlists(&self) -> crate::services::orderlists::Orderlists {
+        crate::services::orderlists::Orderlists::new(self.clone())
+    }
+}
+impl Client {
     /// Access the `orders` service.
     pub fn orders(&self) -> crate::services::orders::Orders {
         crate::services::orders::Orders::new(self.clone())
+    }
+}
+impl Client {
+    /// Access the `pages.delivery` service.
+    pub fn pages_delivery(&self) -> crate::services::pages_delivery::PagesDelivery {
+        crate::services::pages_delivery::PagesDelivery::new(self.clone())
+    }
+}
+impl Client {
+    /// Access the `pages.editor` service.
+    pub fn pages_editor(&self) -> crate::services::pages_editor::PagesEditor {
+        crate::services::pages_editor::PagesEditor::new(self.clone())
+    }
+}
+impl Client {
+    /// Access the `pages.collaboration` service.
+    pub fn pages_collaboration(&self) -> crate::services::pages_collaboration::PagesCollaboration {
+        crate::services::pages_collaboration::PagesCollaboration::new(self.clone())
     }
 }
 impl Client {
@@ -338,9 +442,21 @@ impl Client {
     }
 }
 impl Client {
-    /// Access the `payments` service.
-    pub fn payments(&self) -> crate::services::payments::Payments {
-        crate::services::payments::Payments::new(self.clone())
+    /// Access the `payments.ledger` service.
+    pub fn payments_ledger(&self) -> crate::services::payments_ledger::PaymentsLedger {
+        crate::services::payments_ledger::PaymentsLedger::new(self.clone())
+    }
+}
+impl Client {
+    /// Access the `payments.providers` service.
+    pub fn payments_providers(&self) -> crate::services::payments_providers::PaymentsProviders {
+        crate::services::payments_providers::PaymentsProviders::new(self.clone())
+    }
+}
+impl Client {
+    /// Access the `payments.methods` service.
+    pub fn payments_methods(&self) -> crate::services::payments_methods::PaymentsMethods {
+        crate::services::payments_methods::PaymentsMethods::new(self.clone())
     }
 }
 impl Client {
@@ -356,15 +472,57 @@ impl Client {
     }
 }
 impl Client {
+    /// Access the `products.data-model` service.
+    pub fn products_data_model(&self) -> crate::services::products_data_model::ProductsDataModel {
+        crate::services::products_data_model::ProductsDataModel::new(self.clone())
+    }
+}
+impl Client {
+    /// Access the `products.assets` service.
+    pub fn products_assets(&self) -> crate::services::products_assets::ProductsAssets {
+        crate::services::products_assets::ProductsAssets::new(self.clone())
+    }
+}
+impl Client {
+    /// Access the `products.categories` service.
+    pub fn products_categories(&self) -> crate::services::products_categories::ProductsCategories {
+        crate::services::products_categories::ProductsCategories::new(self.clone())
+    }
+}
+impl Client {
+    /// Access the `products.references` service.
+    pub fn products_references(&self) -> crate::services::products_references::ProductsReferences {
+        crate::services::products_references::ProductsReferences::new(self.clone())
+    }
+}
+impl Client {
     /// Access the `search` service.
     pub fn search(&self) -> crate::services::search::Search {
         crate::services::search::Search::new(self.clone())
     }
 }
 impl Client {
-    /// Access the `shipping` service.
-    pub fn shipping(&self) -> crate::services::shipping::Shipping {
-        crate::services::shipping::Shipping::new(self.clone())
+    /// Access the `settings` service.
+    pub fn settings(&self) -> crate::services::settings::Settings {
+        crate::services::settings::Settings::new(self.clone())
+    }
+}
+impl Client {
+    /// Access the `shipping.carriers` service.
+    pub fn shipping_carriers(&self) -> crate::services::shipping_carriers::ShippingCarriers {
+        crate::services::shipping_carriers::ShippingCarriers::new(self.clone())
+    }
+}
+impl Client {
+    /// Access the `shipping.methods` service.
+    pub fn shipping_methods(&self) -> crate::services::shipping_methods::ShippingMethods {
+        crate::services::shipping_methods::ShippingMethods::new(self.clone())
+    }
+}
+impl Client {
+    /// Access the `shipping.value-lists` service.
+    pub fn shipping_value_lists(&self) -> crate::services::shipping_value_lists::ShippingValueLists {
+        crate::services::shipping_value_lists::ShippingValueLists::new(self.clone())
     }
 }
 impl Client {
@@ -377,11 +535,5 @@ impl Client {
     /// Access the `storage` service.
     pub fn storage(&self) -> crate::services::storage::Storage {
         crate::services::storage::Storage::new(self.clone())
-    }
-}
-impl Client {
-    /// Access the `tokens` service.
-    pub fn tokens(&self) -> crate::services::tokens::Tokens {
-        crate::services::tokens::Tokens::new(self.clone())
     }
 }

@@ -8,13 +8,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let response = client.orders().orders_number_ranges_update(
         "".to_string(),
         Some("".to_string()),
-        Some("".to_string()),
-        Some(0),
-        Some(serde_json::json!({})),
-        Some(0),
-        Some(0),
-        Some("".to_string()),
-        Some(0),
+        Some("order".to_string()),
+        Some(123),
+        Some(serde_json::json!({"owner":"erp-sync"})),
+        Some(6),
+        Some(10),
+        Some("ORD-".to_string()),
+        Some(1),
         Some("".to_string()),
     ).await?;
 

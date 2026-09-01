@@ -89,29 +89,6 @@ impl Avatars {
             Ok(serde_json::from_slice(&api_response.body)?)
         }
     }
-    /// Use this endpoint to fetch the favorite icon (AKA favicon) of any remote
-    /// website URL.
-    /// 
-    /// This endpoint does not follow HTTP redirects.
-    pub async fn avatars_get_favicon(&self, url: String) -> Result<serde_json::Value, Error> {
-        let api_path = "/v1/avatars/favicon".to_string();
-
-        let mut api_params: HashMap<String, Value> = HashMap::new();
-        api_params.insert("url".to_string(), serde_json::to_value(&url)?);
-
-        let mut api_headers: HashMap<String, String> = HashMap::new();
-
-        let api_response = self
-            .client
-            .call("GET", &api_path, api_headers, api_params)
-            .await?;
-
-        if api_response.body.is_empty() {
-            Ok(serde_json::Value::Null)
-        } else {
-            Ok(serde_json::from_slice(&api_response.body)?)
-        }
-    }
     /// You can use this endpoint to show different country flags icons to your
     /// users. The code argument receives the 2 letter country code. Use width,
     /// height and quality arguments to change the output settings. Country codes

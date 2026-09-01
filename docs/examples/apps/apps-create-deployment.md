@@ -7,8 +7,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let response = client.apps().apps_create_deployment(
         "".to_string(),
-        false,
-        "".to_string(),
+        true,
+        crate::input_file::InputFile::new("/path/to/file.png", "file.png"),
         Some("".to_string()),
         Some("".to_string()),
     ).await?;

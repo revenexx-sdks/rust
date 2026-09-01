@@ -7,7 +7,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let response = client.apps().apps_get_usage(
         "".to_string(),
-        Some("".to_string()),
+        Some("24h".to_string()),
     ).await?;
 
     println!("{:?}", response);

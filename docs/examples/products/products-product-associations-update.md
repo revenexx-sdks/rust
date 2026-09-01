@@ -8,9 +8,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let response = client.products().products_product_associations_update(
         "".to_string(),
         Some("".to_string()),
-        Some(0),
+        Some(1),
         Some("".to_string()),
-        Some(0.0),
+        Some(4.0),
         Some("".to_string()),
     ).await?;
 

@@ -3,8 +3,9 @@ use serde::{Deserialize, Serialize};
 /// Log
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct Log {
-    /// Client code name. View list of [available
-    /// options](https://github.com/appwrite/appwrite/blob/master/docs/lists/clients.json).
+    /// Client code name. A short code such as `CH` for Chrome, derived from the
+    /// request's User-Agent by the core service; the full code list is not part of
+    /// this API.
     #[serde(rename = "clientCode", default)]
     pub client_code: String,
     /// Client engine name.
@@ -46,8 +47,9 @@ pub struct Log {
     /// API mode when event triggered.
     #[serde(rename = "mode", default)]
     pub mode: String,
-    /// Operating system code name. View list of [available
-    /// options](https://github.com/appwrite/appwrite/blob/master/docs/lists/os.json).
+    /// Operating system code name. A short code such as `AND` for Android, derived
+    /// from the request's User-Agent by the core service; the full code list is
+    /// not part of this API.
     #[serde(rename = "osCode", default)]
     pub os_code: String,
     /// Operating system name.

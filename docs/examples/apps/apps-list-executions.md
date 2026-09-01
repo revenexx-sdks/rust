@@ -8,7 +8,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let response = client.apps().apps_list_executions(
         "".to_string(),
         Some(vec![]),
-        Some(false),
+        Some(true),
     ).await?;
 
     println!("{:?}", response);

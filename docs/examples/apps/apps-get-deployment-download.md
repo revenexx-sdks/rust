@@ -8,7 +8,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let response = client.apps().apps_get_deployment_download(
         "".to_string(),
         "".to_string(),
-        Some("".to_string()),
+        Some("source".to_string()),
     ).await?;
 
     println!("{:?}", response);

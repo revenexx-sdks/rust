@@ -9,7 +9,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         "".to_string(),
         Some(vec![]),
         Some("".to_string()),
-        Some(false),
+        Some(true),
     ).await?;
 
     println!("{:?}", response);

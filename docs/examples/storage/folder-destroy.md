@@ -7,7 +7,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let response = client.storage().folder_destroy(
         "".to_string(),
-        Some(false),
+        Some(true),
     ).await?;
 
     println!("{:?}", response);

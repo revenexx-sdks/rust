@@ -1,45 +1,63 @@
 use serde::{Deserialize, Serialize};
 
-/// Message
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct Message {
-    /// Message creation time in ISO 8601 format.
-    #[serde(rename = "$createdAt", default)]
+    #[serde(rename = "attachments", default)]
+    pub attachments: Vec<serde_json::Value>,
+    #[serde(rename = "attempts", default)]
+    pub attempts: i64,
+    #[serde(rename = "binding_id", default)]
+    pub binding_id: String,
+    #[serde(rename = "channel", default)]
+    pub channel: String,
+    #[serde(rename = "click_count", default)]
+    pub click_count: i64,
+    #[serde(rename = "clicked_at", default)]
+    pub clicked_at: String,
+    #[serde(rename = "created_at", default)]
     pub created_at: String,
-    /// Message ID.
-    #[serde(rename = "$id", default)]
-    pub id: String,
-    /// Message update date in ISO 8601 format.
-    #[serde(rename = "$updatedAt", default)]
-    pub updated_at: String,
-    /// Data of the message.
     #[serde(rename = "data", default)]
-    pub data: serde_json::Value,
-    /// The time when the message was delivered.
-    #[serde(rename = "deliveredAt", default)]
+    pub data: Vec<serde_json::Value>,
+    #[serde(rename = "delivered_at", default)]
     pub delivered_at: String,
-    /// Number of recipients the message was delivered to.
-    #[serde(rename = "deliveredTotal", default)]
-    pub delivered_total: i64,
-    /// Delivery errors if any.
-    #[serde(rename = "deliveryErrors", default)]
-    pub delivery_errors: Vec<String>,
-    /// Message provider type.
-    #[serde(rename = "providerType", default)]
-    pub provider_type: String,
-    /// The scheduled time for message.
-    #[serde(rename = "scheduledAt", default)]
-    pub scheduled_at: String,
-    /// Status of delivery.
+    #[serde(rename = "error", default)]
+    pub error: String,
+    #[serde(rename = "from_draft", default)]
+    pub from_draft: bool,
+    #[serde(rename = "id", default)]
+    pub id: String,
+    #[serde(rename = "idempotency_fingerprint", default)]
+    pub idempotency_fingerprint: String,
+    #[serde(rename = "idempotency_key", default)]
+    pub idempotency_key: String,
+    #[serde(rename = "locale", default)]
+    pub locale: String,
+    #[serde(rename = "market", default)]
+    pub market: String,
+    #[serde(rename = "message_class", default)]
+    pub message_class: String,
+    #[serde(rename = "open_count", default)]
+    pub open_count: i64,
+    #[serde(rename = "opened_at", default)]
+    pub opened_at: String,
+    #[serde(rename = "provider_message_id", default)]
+    pub provider_message_id: String,
+    #[serde(rename = "scheduled_for", default)]
+    pub scheduled_for: String,
+    #[serde(rename = "sent_at", default)]
+    pub sent_at: String,
+    #[serde(rename = "source_event_id", default)]
+    pub source_event_id: String,
     #[serde(rename = "status", default)]
     pub status: String,
-    /// Target IDs set as recipients.
-    #[serde(rename = "targets", default)]
-    pub targets: Vec<String>,
-    /// Topic IDs set as recipients.
-    #[serde(rename = "topics", default)]
-    pub topics: Vec<String>,
-    /// User IDs set as recipients.
-    #[serde(rename = "users", default)]
-    pub users: Vec<String>,
+    #[serde(rename = "subject", default)]
+    pub subject: String,
+    #[serde(rename = "suppression_reason", default)]
+    pub suppression_reason: String,
+    #[serde(rename = "template_key", default)]
+    pub template_key: String,
+    #[serde(rename = "tenant_id", default)]
+    pub tenant_id: String,
+    #[serde(rename = "to", default)]
+    pub to: String,
 }

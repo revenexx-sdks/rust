@@ -7,6 +7,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let response = client.orders().orders_comments_list(
         "".to_string(),
+        Some("".to_string()),
+        Some("Called the customer, delivery agreed for next week.".to_string()),
+        Some("internal".to_string()),
+        Some("service-desk".to_string()),
+        Some("2026-01-01T12:00:00Z".to_string()),
+        Some(50),
+        Some(0),
+        Some("created_at.desc".to_string()),
     ).await?;
 
     println!("{:?}", response);

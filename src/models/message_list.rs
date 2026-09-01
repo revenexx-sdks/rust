@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 pub struct MessageList {
     /// List of messages.
     #[serde(rename = "messages", default)]
-    pub messages: Vec<crate::models::Message>,
+    pub messages: Vec<crate::models::Message2>,
     /// Total number of messages that matched your query.
     #[serde(rename = "total", default)]
     pub total: i64,

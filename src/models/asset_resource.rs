@@ -30,12 +30,17 @@ pub struct AssetResource {
     pub metadata: Vec<serde_json::Value>,
     #[serde(rename = "mime_type", default)]
     pub mime_type: String,
+    #[serde(rename = "model_url", default)]
+    pub model_url: String,
     #[serde(rename = "original_name", default)]
     pub original_name: String,
     #[serde(rename = "page_count", default)]
     pub page_count: i64,
     #[serde(rename = "path_name", default)]
     pub path_name: String,
+    /// 3D derivatives (null unless rendered): preview image + .glb mesh.
+    #[serde(rename = "preview_url", default)]
+    pub preview_url: String,
     #[serde(rename = "processed_at", default)]
     pub processed_at: String,
     #[serde(rename = "size_bytes", default)]
@@ -48,8 +53,12 @@ pub struct AssetResource {
     pub tenant_id: String,
     #[serde(rename = "updated_at", default)]
     pub updated_at: String,
+    /// Null for a private asset — it is only reachable through a signed
+    /// URL, so there is no path-addressed public URL to hand out.
     #[serde(rename = "url", default)]
     pub url: String,
+    #[serde(rename = "usdz_url", default)]
+    pub usdz_url: String,
     #[serde(rename = "visibility", default)]
     pub visibility: String,
     #[serde(rename = "width", default)]

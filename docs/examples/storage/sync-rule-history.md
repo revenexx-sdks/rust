@@ -7,8 +7,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let response = client.storage().sync_rule_history(
         Some("".to_string()),
-        Some("".to_string()),
-        Some("".to_string()),
+        Some("2026-01-01T12:00:00Z".to_string()),
+        Some("2026-01-01T12:00:00Z".to_string()),
     ).await?;
 
     println!("{:?}", response);

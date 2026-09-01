@@ -7,10 +7,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let response = client.prices().prices_resolve(
         vec![],
+        Some("2026-03-15T09:00:00Z".to_string()),
         Some("".to_string()),
         Some("".to_string()),
-        Some("".to_string()),
-        Some("".to_string()),
+        Some("EUR".to_string()),
         Some("".to_string()),
         Some("".to_string()),
     ).await?;

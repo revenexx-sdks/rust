@@ -13,7 +13,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         Some("".to_string()),
         Some("".to_string()),
         Some(vec![]),
-        Some("".to_string()),
+        Some("public".to_string()),
     ).await?;
 
     println!("{:?}", response);

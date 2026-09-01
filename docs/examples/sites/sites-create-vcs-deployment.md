@@ -7,9 +7,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let response = client.sites().sites_create_vcs_deployment(
         "".to_string(),
-        "".to_string(),
-        "".to_string(),
-        Some(false),
+        "main".to_string(),
+        "branch".to_string(),
+        Some(true),
     ).await?;
 
     println!("{:?}", response);

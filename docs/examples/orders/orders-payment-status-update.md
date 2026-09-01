@@ -7,8 +7,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let response = client.orders().orders_payment_status_update(
         "".to_string(),
-        "".to_string(),
-        Some("".to_string()),
+        "open".to_string(),
+        Some("pay_000000000001".to_string()),
     ).await?;
 
     println!("{:?}", response);

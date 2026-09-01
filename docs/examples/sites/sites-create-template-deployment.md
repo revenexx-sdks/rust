@@ -11,8 +11,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         "".to_string(),
         "".to_string(),
         "".to_string(),
-        "".to_string(),
-        Some(false),
+        "branch".to_string(),
+        Some(true),
     ).await?;
 
     println!("{:?}", response);

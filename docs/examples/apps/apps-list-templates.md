@@ -8,9 +8,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let response = client.apps().apps_list_templates(
         Some(vec![]),
         Some(vec![]),
-        Some(0),
-        Some(0),
-        Some(false),
+        Some(1),
+        Some(1),
+        Some(true),
     ).await?;
 
     println!("{:?}", response);

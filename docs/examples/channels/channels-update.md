@@ -7,13 +7,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let response = client.channels().channels_update(
         "".to_string(),
-        Some("".to_string()),
-        Some(false),
-        Some(serde_json::json!({})),
-        Some("".to_string()),
-        Some(0),
-        Some("".to_string()),
-        Some("".to_string()),
+        Some("shop".to_string()),
+        Some(true),
+        Some(serde_json::json!({"de":"Shop","en":"Shop"})),
+        Some("Shop".to_string()),
+        Some(1),
+        Some("active".to_string()),
+        Some("storefront".to_string()),
+        Some("inherit".to_string()),
     ).await?;
 
     println!("{:?}", response);

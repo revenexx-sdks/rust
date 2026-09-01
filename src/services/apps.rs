@@ -410,13 +410,12 @@ impl Apps {
     /// archive containing the App source. Phase 2 will extract the
     /// manifest from this archive and validate it against the App
     /// Registry before kicking off the build.
-    pub async fn apps_create_deployment(&self, function_id: String, activate: bool, code: String, commands: Option<String>, entrypoint: Option<String>) -> Result<crate::models::Deployment, Error> {
+    pub async fn apps_create_deployment(&self, function_id: String, activate: bool, code: crate::input_file::InputFile, commands: Option<String>, entrypoint: Option<String>) -> Result<crate::models::Deployment, Error> {
         let api_path = "/v1/apps/{functionId}/deployments".replace("{functionId}", &function_id.to_string());
 
         let mut api_params: HashMap<String, Value> = HashMap::new();
         api_params.insert("functionId".to_string(), serde_json::to_value(&function_id)?);
         api_params.insert("activate".to_string(), serde_json::to_value(&activate)?);
-        api_params.insert("code".to_string(), serde_json::to_value(&code)?);
         if let Some(value) = &commands {
             api_params.insert("commands".to_string(), serde_json::to_value(value)?);
         }
@@ -429,7 +428,7 @@ impl Apps {
 
         let api_response = self
             .client
-            .call("POST", &api_path, api_headers, api_params)
+            .file_upload(&api_path, api_headers, api_params, "code", code)
             .await?;
 
         Ok(serde_json::from_slice(&api_response.body)?)

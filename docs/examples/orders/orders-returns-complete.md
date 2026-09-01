@@ -8,7 +8,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let response = client.orders().orders_returns_complete(
         "".to_string(),
         "".to_string(),
-        Some("".to_string()),
+        Some("refund".to_string()),
     ).await?;
 
     println!("{:?}", response);
