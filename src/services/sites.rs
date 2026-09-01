@@ -281,13 +281,12 @@ impl Sites {
     /// Create a new site code deployment. Use this endpoint to upload a new
     /// version of your site code. To activate your newly uploaded code, you'll
     /// need to update the site's deployment to use your new deployment ID.
-    pub async fn sites_create_deployment(&self, site_id: String, activate: bool, code: String, build_command: Option<String>, install_command: Option<String>, output_directory: Option<String>) -> Result<crate::models::Deployment, Error> {
+    pub async fn sites_create_deployment(&self, site_id: String, activate: bool, code: crate::input_file::InputFile, build_command: Option<String>, install_command: Option<String>, output_directory: Option<String>) -> Result<crate::models::Deployment, Error> {
         let api_path = "/v1/sites/{siteId}/deployments".replace("{siteId}", &site_id.to_string());
 
         let mut api_params: HashMap<String, Value> = HashMap::new();
         api_params.insert("siteId".to_string(), serde_json::to_value(&site_id)?);
         api_params.insert("activate".to_string(), serde_json::to_value(&activate)?);
-        api_params.insert("code".to_string(), serde_json::to_value(&code)?);
         if let Some(value) = &build_command {
             api_params.insert("buildCommand".to_string(), serde_json::to_value(value)?);
         }
@@ -303,7 +302,7 @@ impl Sites {
 
         let api_response = self
             .client
-            .call("POST", &api_path, api_headers, api_params)
+            .file_upload(&api_path, api_headers, api_params, "code", code)
             .await?;
 
         Ok(serde_json::from_slice(&api_response.body)?)
@@ -332,9 +331,10 @@ impl Sites {
     }
     /// Create a deployment based on a template.
     /// 
-    /// Use this endpoint with combination of
-    /// [listTemplates](https://appwrite.io/docs/products/sites/templates) to find
-    /// the template details.
+    /// Unlike app templates, site templates have no listing on this API — that
+    /// catalogue is the vendor's and is not reproduced here. Take `repository`,
+    /// `owner`, `rootDirectory` and `reference` from wherever the template is
+    /// published.
     pub async fn sites_create_template_deployment(&self, site_id: String, owner: String, reference: String, repository: String, root_directory: String, xtype: String, activate: Option<bool>) -> Result<crate::models::Deployment, Error> {
         let api_path = "/v1/sites/{siteId}/deployments/template".replace("{siteId}", &site_id.to_string());
 

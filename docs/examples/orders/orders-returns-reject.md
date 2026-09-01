@@ -8,8 +8,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let response = client.orders().orders_returns_reject(
         "".to_string(),
         "".to_string(),
-        Some("".to_string()),
-        Some("".to_string()),
+        Some("Returned outside the agreed window".to_string()),
+        Some("wear_and_tear".to_string()),
     ).await?;
 
     println!("{:?}", response);

@@ -8,10 +8,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let response = client.markets().markets_locales_update(
         "".to_string(),
         "".to_string(),
-        Some("".to_string()),
-        Some("".to_string()),
-        Some(false),
-        Some("".to_string()),
+        Some("de-DE".to_string()),
+        Some("DE".to_string()),
+        Some(true),
+        Some("de".to_string()),
         Some(0),
     ).await?;
 

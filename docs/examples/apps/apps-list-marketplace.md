@@ -7,8 +7,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let response = client.apps().apps_list_marketplace(
         Some("".to_string()),
-        Some(0),
-        Some(0),
+        Some(1),
+        Some(1),
     ).await?;
 
     println!("{:?}", response);

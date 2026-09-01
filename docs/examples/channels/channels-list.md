@@ -6,6 +6,20 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let client = Client::new()        .set_endpoint("https://api.revenexx.com")        .set_api_key_auth("<API_KEY>")        ;
 
     let response = client.channels().channels_list(
+        Some("".to_string()),
+        Some("shop".to_string()),
+        Some("Shop".to_string()),
+        Some("{"en":"Shop","de":"Shop"}".to_string()),
+        Some("storefront".to_string()),
+        Some("active".to_string()),
+        Some("inherit".to_string()),
+        Some(true),
+        Some(1),
+        Some("2026-01-01T12:00:00Z".to_string()),
+        Some("2026-01-01T12:00:00Z".to_string()),
+        Some(1),
+        Some(1),
+        Some("created_at.desc".to_string()),
     ).await?;
 
     println!("{:?}", response);

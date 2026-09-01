@@ -8,6 +8,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let response = client.prices().prices_entries_bulk(
         "".to_string(),
         vec![],
+        Some("upsert".to_string()),
     ).await?;
 
     println!("{:?}", response);

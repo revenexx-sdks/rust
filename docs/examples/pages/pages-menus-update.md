@@ -8,7 +8,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let response = client.pages().pages_menus_update(
         "".to_string(),
         Some(vec![]),
-        Some("".to_string()),
+        Some("Main navigation".to_string()),
     ).await?;
 
     println!("{:?}", response);

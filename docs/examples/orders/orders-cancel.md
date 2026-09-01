@@ -7,8 +7,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let response = client.orders().orders_cancel(
         "".to_string(),
-        Some("".to_string()),
-        Some("".to_string()),
+        Some("service-desk".to_string()),
+        Some("Customer withdrew the order".to_string()),
     ).await?;
 
     println!("{:?}", response);

@@ -7,7 +7,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let response = client.carts().carts_claim(
         "".to_string(),
-        "".to_string(),
+        "a1b2c3d4e5f6".to_string(),
+        Some("merge".to_string()),
         Some("".to_string()),
     ).await?;
 

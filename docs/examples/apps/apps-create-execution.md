@@ -7,11 +7,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let response = client.apps().apps_create_execution(
         "".to_string(),
-        Some(false),
+        Some(true),
         Some("".to_string()),
         Some(serde_json::json!({})),
-        Some("".to_string()),
-        Some("".to_string()),
+        Some("GET".to_string()),
+        Some("/".to_string()),
         Some("".to_string()),
     ).await?;
 

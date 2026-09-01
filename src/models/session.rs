@@ -12,8 +12,9 @@ pub struct Session {
     /// Session update date in ISO 8601 format.
     #[serde(rename = "$updatedAt", default)]
     pub updated_at: String,
-    /// Client code name. View list of [available
-    /// options](https://github.com/appwrite/appwrite/blob/master/docs/lists/clients.json).
+    /// Client code name. A short code such as `CH` for Chrome, derived from the
+    /// request's User-Agent by the core service; the full code list is not part of
+    /// this API.
     #[serde(rename = "clientCode", default)]
     pub client_code: String,
     /// Client engine name.
@@ -62,8 +63,9 @@ pub struct Session {
     /// MFA challenge.
     #[serde(rename = "mfaUpdatedAt", default)]
     pub mfa_updated_at: String,
-    /// Operating system code name. View list of [available
-    /// options](https://github.com/appwrite/appwrite/blob/master/docs/lists/os.json).
+    /// Operating system code name. A short code such as `AND` for Android, derived
+    /// from the request's User-Agent by the core service; the full code list is
+    /// not part of this API.
     #[serde(rename = "osCode", default)]
     pub os_code: String,
     /// Operating system name.

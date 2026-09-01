@@ -7,7 +7,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let response = client.orders().orders_hold(
         "".to_string(),
-        Some("".to_string()),
+        Some("Credit check pending".to_string()),
     ).await?;
 
     println!("{:?}", response);

@@ -1,13 +1,13 @@
 [package]
 name = "revenexx"
-version = "0.0.1"
+version = "0.0.2"
 edition = "2021"
 description = "Revenexx Rust SDK."
 license = "MIT"
 repository = "https://github.com/revenexx-sdks/rust"
 homepage = "https://revenexx.com"
 readme = "README.md"
-keywords = ["sdk", "api", "revenexx api — revenexx"]
+keywords = ["sdk", "api", "revenexx"]
 categories = ["api-bindings"]
 
 [dependencies]

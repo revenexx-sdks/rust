@@ -7,13 +7,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let response = client.markets().markets_update(
         "".to_string(),
-        Some("".to_string()),
-        Some("".to_string()),
+        Some("northwind".to_string()),
+        Some("EUR".to_string()),
         Some(false),
-        Some(serde_json::json!({})),
-        Some("".to_string()),
+        Some(serde_json::json!({"de-DE":"Nordwind","en-GB":"Northwind"})),
+        Some("Northwind".to_string()),
         Some(0),
-        Some("".to_string()),
+        Some("active".to_string()),
     ).await?;
 
     println!("{:?}", response);

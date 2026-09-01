@@ -7,7 +7,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let response = client.storage().asset_sign(
         "".to_string(),
-        Some(0),
+        Some(1),
     ).await?;
 
     println!("{:?}", response);

@@ -8,12 +8,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let response = client.carts().carts_create(
         Some("".to_string()),
         Some("".to_string()),
-        Some("".to_string()),
-        Some(false),
-        Some("".to_string()),
-        Some(serde_json::json!({})),
-        Some("".to_string()),
-        Some("".to_string()),
+        Some("EUR".to_string()),
+        Some(true),
+        Some(serde_json::json!({"campaign":"spring-catalogue","locale":"de-DE","source":"storefront"})),
+        Some("Weekly order".to_string()),
+        Some("a1b2c3d4e5f6".to_string()),
     ).await?;
 
     println!("{:?}", response);

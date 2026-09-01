@@ -7,11 +7,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let response = client.pages().pages_templates_update(
         "".to_string(),
-        Some("".to_string()),
-        Some("".to_string()),
-        Some(false),
-        Some("".to_string()),
-        Some("".to_string()),
+        Some("Full-width hero followed by a two-column teaser row.".to_string()),
+        Some("content".to_string()),
+        Some(true),
+        Some("Hero with two teasers".to_string()),
+        Some("standard".to_string()),
         Some(vec![]),
     ).await?;
 

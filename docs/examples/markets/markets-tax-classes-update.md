@@ -8,12 +8,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let response = client.markets().markets_tax_classes_update(
         "".to_string(),
         "".to_string(),
-        Some("".to_string()),
-        Some(false),
-        Some(serde_json::json!({})),
-        Some("".to_string()),
+        Some("standard".to_string()),
+        Some(true),
+        Some(serde_json::json!({"de-DE":"Regelsatz","en-GB":"Standard rate"})),
+        Some("Standard rate".to_string()),
         Some(0),
-        Some(0.0),
+        Some(20.0),
     ).await?;
 
     println!("{:?}", response);

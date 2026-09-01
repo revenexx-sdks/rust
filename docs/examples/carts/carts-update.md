@@ -8,10 +8,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let response = client.carts().carts_update(
         "".to_string(),
         Some("".to_string()),
-        Some("".to_string()),
-        Some("".to_string()),
-        Some(serde_json::json!({})),
-        Some("".to_string()),
+        Some("EUR".to_string()),
+        Some(serde_json::json!({"campaign":"spring-catalogue","locale":"de-DE","source":"storefront"})),
+        Some("Weekly order".to_string()),
     ).await?;
 
     println!("{:?}", response);

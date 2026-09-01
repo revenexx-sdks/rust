@@ -8,7 +8,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let response = client.sites().sites_list_logs(
         "".to_string(),
         Some(vec![]),
-        Some(false),
+        Some(true),
     ).await?;
 
     println!("{:?}", response);

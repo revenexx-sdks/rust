@@ -7,10 +7,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let response = client.markets().markets_locales_create(
         "".to_string(),
-        "".to_string(),
-        "".to_string(),
-        "".to_string(),
-        Some(false),
+        "de-DE".to_string(),
+        "DE".to_string(),
+        "de".to_string(),
+        Some(true),
         Some(0),
     ).await?;
 

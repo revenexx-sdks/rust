@@ -7,6 +7,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let response = client.storage().sync_rule_update(
         "".to_string(),
+        Some(true),
+        Some(vec![]),
+        Some("0 3 * * *".to_string()),
+        Some("".to_string()),
+        Some("/uploads".to_string()),
+        Some("".to_string()),
     ).await?;
 
     println!("{:?}", response);

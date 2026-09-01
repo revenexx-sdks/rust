@@ -7,6 +7,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let response = client.pages().pages_pages_revisions(
         "".to_string(),
+        Some(1),
+        Some(1),
+        Some("created_at.desc".to_string()),
+        Some("Autumn campaign".to_string()),
+        Some("".to_string()),
+        Some("".to_string()),
+        Some("".to_string()),
     ).await?;
 
     println!("{:?}", response);

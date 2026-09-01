@@ -7,9 +7,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let response = client.orders().orders_return(
         "".to_string(),
-        vec![],
-        Some(serde_json::json!({})),
-        Some("".to_string()),
+        Some(serde_json::json!({"rma_portal_case":"C-2026-0917"})),
+        Some(vec![]),
+        Some("Damaged on arrival".to_string()),
+        Some(true),
     ).await?;
 
     println!("{:?}", response);

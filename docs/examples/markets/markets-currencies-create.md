@@ -7,8 +7,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let response = client.markets().markets_currencies_create(
         "".to_string(),
-        "".to_string(),
-        Some(false),
+        "EUR".to_string(),
+        Some(true),
         Some(0),
     ).await?;
 

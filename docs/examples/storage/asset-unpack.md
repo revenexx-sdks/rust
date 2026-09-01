@@ -7,7 +7,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let response = client.storage().asset_unpack(
         "".to_string(),
-        Some(false),
+        Some(true),
         Some("".to_string()),
     ).await?;
 
